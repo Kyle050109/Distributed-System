@@ -9,7 +9,7 @@
 - `CalculatorClient.java` — simple client demonstrating all remote methods + bonus
 - `MultiClientTest.java` — automated tests (single client + multi-client concurrency)
 
-> No packages; place all `.java` files under `src/`.
+No packages; place all `.java` files under `src/`.
 
 ## Compile
 ```bash
@@ -41,8 +41,8 @@ cd src
 java MultiClientTest
 ```
 What it covers:
-Multi-client (>3): 6 threads push values concurrently, then min reduces to 7.
-Single client: verifies gcd(12,18,30)=6, lcm(4,6,14)=84.
-delayPop (single client): pushes 123, pops after delay.
-delayPop contention: 4 threads competing; exactly one gets 999.
-Bonus session isolation: sessions S-A and S-B behave independently.
+- Multi-client (>3): 6 threads push values concurrently, then min reduces to 7.
+- Single client: verifies gcd(12,18,30)=6, lcm(4,6,14)=84.
+- delayPop (single client): pushes 123, pops after delay.
+- delayPop contention: 4 threads competing; exactly one gets 999.
+- Bonus session isolation: sessions S-A and S-B behave independently.
