@@ -65,3 +65,37 @@ Expected output includes:
 - OK: lcm(4,6,14)
 - OK: delayPop clears
 
+B. Verify Bonus (Per-Client Isolated Stacks)
+- Run either:
+  ```bash
+  cd src
+  java CalculatorClient
+  ```
+- or check MultiClientTest output:
+  ```bash
+  OK: Session A result
+  OK: Session B result
+  OK: both sessions empty
+  ```
+Each session (A, B) maintains its own stack.
+
+If meet trouble, please check server is running before client.
+
+- Quick Demo Sequence:
+```bash
+# 0) Compile
+cd src
+javac *.java
+
+# 1) Start server
+java CalculatorServer
+
+# 2) Run automated test (covers everything, including Bonus)
+java MultiClientTest
+
+# 3) (Optional) Run demo client
+java CalculatorClient
+```
+
+
+
