@@ -9,7 +9,7 @@
 - `CalculatorClient.java` — simple client demonstrating all remote methods + bonus
 - `MultiClientTest.java` — automated tests (single client + multi-client concurrency)
 
-No packages; place all `.java` files under `src/`.
+No packages; place all `.java` files under `src/`. (src is in the he big file which includes all my assignment1 files.)
 
 ## Compile
 ```bash
