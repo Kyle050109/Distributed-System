@@ -15,3 +15,10 @@
 ```bash
 cd src
 javac *.java
+```
+
+# Run the server
+```bash
+cd src
+java CalculatorServer
+```
