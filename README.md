@@ -46,3 +46,22 @@ What it covers:
 - delayPop (single client): pushes 123, pops after delay.
 - delayPop contention: 4 threads competing; exactly one gets 999.
 - Bonus session isolation: sessions S-A and S-B behave independently.
+
+# Verifying Basic vs Bonus
+A. Verify Basic Requirements (Shared Stack)
+- 1. Start server
+  ```bash
+   cd src
+   java CalculatorServer
+  ```
+- 2. Run automated test:
+  ```bash
+  cd src
+  java MultiClientTest
+  ```
+Expected output includes:
+- OK: Shared min of {7,14,21,28,35,42}
+- OK: gcd(12,18,30)
+- OK: lcm(4,6,14)
+- OK: delayPop clears
+
