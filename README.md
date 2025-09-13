@@ -49,7 +49,7 @@
 
 **- JsonUtil.java**
    - Default: parse/serialize with Gson.
-   - Bonus: can switch to MiniJsonParser at the last one row with flag **USE_MINI_PARSER = true.**
+   - Bonus: can switch to MiniJsonParser at the last one row with flag **USE_MINI_PARSER = true.** 
 
 
 **Persistence & Crash Recovery**
@@ -203,7 +203,7 @@ mvn test
 
 - SystemIntegrationTest → full flow: ContentServer → AggregationServer → GETClient, expiry, caching.
 
-For manul test to check persistency:
+For manul test to check persistency: YOU CAN RUN ALL THE BELOW CODES IN SAME TERMINAL
 
 ```bash
 1. firstly you need to go the directory where pom.xml at
@@ -231,4 +231,24 @@ mvn exec:java -Dexec.mainClass="ds.weather.AggregationServer" \
 curl http://localhost:4567/weather.json | jq .
 ```
 
+**Bonus feature**
 
+MiniJsonParser.java: self-written flat JSON parser via JsonUtil.java
+
+```bash
+JsonUtil.USE_MINI_PARSER = true;
+```
+
+**Summary**
+
+This system demonstrates:
+
+- Distributed systems principles (Lamport, consistency, failure recovery).
+
+- RESTful design (stateless, uniform interface).
+
+- Resilience patterns (retry, backoff, circuit breaker).
+
+- Crash-safe persistence (WAL + snapshot).
+
+- Automated tests to validate correctness.
