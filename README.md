@@ -239,6 +239,23 @@ MiniJsonParser.java: self-written flat JSON parser via JsonUtil.java
 JsonUtil.USE_MINI_PARSER = true;
 ```
 
+
+**HTTP and Status Codes** (Implemented using Socket)
+
+- Only GET and PUT are supported; Other methods return 400.
+
+- Create its data entry for a certain content server for the first time: 201; Subsequent update: 200.
+
+- Empty content: 204.
+
+- Parse to illegal/unreasonable JSON: 500.
+
+- Resource does not exist/parameter error: 400 (the question requires simplification).
+
+Overload/Queue full: 503.
+
+GET supports ETag/If-None-Match -> 304.
+
 **Summary**
 
 This system demonstrates:
