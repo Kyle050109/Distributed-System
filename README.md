@@ -138,9 +138,9 @@ grep -h "CONSENSUS:" logs/*.out | wc -l # expected: 9
 ```
 - 3c: After M3 proposed, it crashes -> M1 takes the relay
 ```
+# crash (kill the processes) after propose
 printf "propose M3\n" | nc -w 1 localhost 10083 # expected: OK propose M3
 sleep 1
-# crash (kill the processes)
 kill "$(cat logs/M3.pid)" 2>/dev/null || pkill -f "--id M3"
 
 # other members take the relay
