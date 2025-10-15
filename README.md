@@ -96,7 +96,8 @@ grep -h "CONSENSUS:" logs/*.out logs/*.log | sort | uniq -c
 # all members reliable（start_fresh will do this）
 printf "propose M5\n" | nc -w 1 localhost 10085
 sleep 1
-grep -h "CONSENSUS:" logs/*.out | wc -l   # expected 9
+grep -h "CONSENSUS:" logs/*.out | wc -l
+# expected 9
 ```
 - Scenario 2: Concurrent Proposals:
 ```
@@ -106,7 +107,7 @@ printf "propose M8\n" | nc -w 1 localhost 10088 &
 wait
 sleep 2
 grep -h "CONSENSUS:" logs/*.out | wc -l
-# expeted: only one winner M1, and shows IGNORED...
+# expected: only one winner M1, and shows IGNORED...
 ```
 - Scenario 3: Fault-Tolerance: (state change（M1=reliable, M2=latent, M3=reliable, others are standard)
 - Once run 3a/3b/3c, ./start_fresh.sh --keep first, input below code then run.
