@@ -8,7 +8,7 @@
 - The elected result that reaches a single consensus in various scenarios (ideal network, concurrent proposal, fault tolerance, persistence, resolution stability)
 - Audit logs are produced through scripts and tests as evidence.
 
-1. Requirements:
+# 1. Requirements:
 - OS: macOS or Linux (tested on macOS)
 - Java: JDK 11
 - Maven: 3.8+ (3.9.x OK)
@@ -16,7 +16,7 @@
   - Data-plane (member sockets): 19001..19009
   - Control-plane (admin sockets): 10081..10089
 
-2. Network Configuration:
+# 2. Network Configuration:
 ```bash
 M1,localhost,19001
 M2,localhost,19002
@@ -30,13 +30,13 @@ M9,localhost,19009
 ```
 - These data-plane ports are where members listen for Paxos messages.
 
-3. Build:
+# 3. Build:
 - Use
 ```
 mvn package
 mvn compile
 ```
-4. Quick Start:
+# 4. Quick Start:
 ```
 # To initialize environment
 ./start_fresh.sh --keep
@@ -48,7 +48,7 @@ printf "propose M5\n" | nc -w 1 localhost 10084
 grep -h "CONSENSUS:" logs/*.out logs/*.log | sort | uniq -c
 ```
 
-5. Admin command:
+# 5. Admin command:
 - One-click clearance and start:
   - By default, 9 processes will be stopped at the end.
   - "keep" means to keep running, which is convenient for you to operate manually.
@@ -76,7 +76,7 @@ printf "reset\n" | nc -w 1 localhost 10081
 printf "winner?\n" | nc -w 1 localhost 10081
 ```
 
-6. Logs and Verification:
+# 6. Logs and Verification:
 - Two types of logs exist simultaneously
   - logs/M?.out：Standard output (plain text, often 'CONSENSUS:' at the beginning of the line).
   - logs/M? .log: Structured (including the prefix [time][node=M?]).
@@ -90,7 +90,7 @@ grep -h "CONSENSUS:" logs/*.out | wc -l # expected: 9
 grep -h "CONSENSUS:" logs/*.out logs/*.log | sort | uniq -c
 # Will see: a line of "9 CONSENSUS:..." Each node has one structured line
 ```
-7.Manual demonstration: (If you see 'Already decided:...' It indicates that a resolution was reached before; First './start_fresh.sh --keep' then start the round again.)
+# 7. Manual demonstration: (If you see 'Already decided:...' It indicates that a resolution was reached before; First './start_fresh.sh --keep' then start the round again.)
 - Scenario 1: The Ideal Network
 ```
 # all members reliable（start_fresh will do this）
