@@ -108,7 +108,7 @@ sleep 2
 grep -h "CONSENSUS:" logs/*.out | wc -l
 # expeted: only one winner M1, and shows IGNORED...
 ```
-- Scenario 3: Fault-Tolerance: (state change（M1=reliable, M2=latent, M3=failure, others are standard)
+- Scenario 3: Fault-Tolerance: (state change（M1=reliable, M2=latent, M3=reliable, others are standard)
 - Once run 3a/3b/3c, ./start_fresh.sh --keep first, input below code then run.
 ```
 printf "profile set M1 reliable\n" | nc -w 1 localhost 10081
