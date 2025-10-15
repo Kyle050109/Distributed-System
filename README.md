@@ -106,7 +106,7 @@ printf "propose M8\n" | nc -w 1 localhost 10088 &
 wait
 sleep 2
 grep -h "CONSENSUS:" logs/*.out | wc -l
-# expeted:：only one winner（M1 or M8）
+# expeted: only one winner M1, and shows IGNORED...
 ```
 - Scenario 3: Fault-Tolerance: (state change（M1=reliable, M2=latent, M3=failure, others are standard）
 ```
