@@ -120,7 +120,7 @@ done
 ```
 - 3a: (M4 propose)
 ```
-printf "propose M4\n" | nc -w 1 localhost 10085
+printf "propose M4\n" | nc -w 1 localhost 10084
 sleep 3
 # expected: OK propose M4
 grep -h "CONSENSUS:" logs/*.out | wc -l # expected: 9
