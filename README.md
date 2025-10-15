@@ -108,7 +108,8 @@ sleep 2
 grep -h "CONSENSUS:" logs/*.out | wc -l
 # expeted: only one winner M1, and shows IGNORED...
 ```
-- Scenario 3: Fault-Tolerance: (state change（M1=reliable, M2=latent, M3=failure, others are standard）
+- Scenario 3: Fault-Tolerance: (state change（M1=reliable, M2=latent, M3=failure, others are standard)
+- Once run 3a/3b/3c, ./start_fresh.sh --keep first, input below code then run.
 ```
 printf "profile set M1 reliable\n" | nc -w 1 localhost 10081
 printf "profile set M2 latent\n"   | nc -w 1 localhost 10082
@@ -125,13 +126,14 @@ sleep 3
 # expected: OK propose M4
 grep -h "CONSENSUS:" logs/*.out | wc -l # expected: 9
 ```
-- 3b: (M2（latent）propose -> change to cafe (reliable))
+- 3b: (M2 (latent) propose -> change to cafe (reliable))
 ```
 printf "propose M2\n" | nc -w 1 localhost 10082
 sleep 2
-# expected: OK propose M2
-printf "profile set M2 cafe\n" | nc -w 1 localhost 10082 # expected: OK profile M2 reliable or cafe
+#expected: OK propose M2
+printf "profile set M2 cafe\n" | nc -w 1 localhost 10082 
 sleep 2
+#expected: OK profile M2 reliable or cafe
 grep -h "CONSENSUS:" logs/*.out | wc -l # expected: 9
 ```
 - 3c: After M3 proposed, it crashes -> M1 takes the relay
