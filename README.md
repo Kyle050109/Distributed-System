@@ -94,7 +94,7 @@ grep -h "CONSENSUS:" logs/*.out logs/*.log | sort | uniq -c
 - Scenario 1: The Ideal Network
 ```
 # all members reliable（start_fresh will do this）
-printf "propose M5\n" | nc -w 1 localhost 10084
+printf "propose M5\n" | nc -w 1 localhost 10085
 sleep 1
 grep -h "CONSENSUS:" logs/*.out | wc -l   # expected 9
 ```
