@@ -113,7 +113,7 @@ grep -h "CONSENSUS:" logs/*.out | wc -l
 ```
 printf "profile set M1 reliable\n" | nc -w 1 localhost 10081
 printf "profile set M2 latent\n"   | nc -w 1 localhost 10082
-printf "profile set M3 failure\n"  | nc -w 1 localhost 10083
+printf "profile set M3 reliable\n"  | nc -w 1 localhost 10083
 for i in 4 5 6 7 8 9; do
   p=$((10080+i)); id=M$i
   printf "profile set $id standard\n" | nc -w 1 localhost $p
@@ -138,8 +138,8 @@ grep -h "CONSENSUS:" logs/*.out | wc -l # expected: 9
 ```
 - 3c: After M3 proposed, it crashes -> M1 takes the relay
 ```
-# crash (kill the processes) after propose
-printf "propose M3\n" | nc -w 1 localhost 10083 # expected: OK propose M3
+# crash (kill the processes) after propose # expected: OK propose M3
+printf "propose M3\n" | nc -w 1 localhost 10083
 sleep 1
 kill "$(cat logs/M3.pid)" 2>/dev/null || pkill -f "--id M3"
 
