@@ -8,7 +8,7 @@
 - The elected result that reaches a single consensus in various scenarios (ideal network, concurrent proposal, fault tolerance, persistence, resolution stability)
 - Audit logs are produced through scripts and tests as evidence.
 
-1.Requirements:
+1. Requirements:
 - OS: macOS or Linux (tested on macOS)
 - Java: JDK 11
 - Maven: 3.8+ (3.9.x OK)
@@ -16,7 +16,7 @@
   - Data-plane (member sockets): 19001..19009
   - Control-plane (admin sockets): 10081..10089
 
-2.Network Configuration:
+2. Network Configuration:
 ```bash
 M1,localhost,19001
 M2,localhost,19002
@@ -30,13 +30,13 @@ M9,localhost,19009
 ```
 - These data-plane ports are where members listen for Paxos messages.
 
-3.Build:
+3. Build:
 - Use
 ```
 mvn package
 mvn compile
 ```
-4.Quick Start:
+4. Quick Start:
 ```
 # To initialize environment
 ./start_fresh.sh --keep
@@ -48,7 +48,7 @@ printf "propose M5\n" | nc -w 1 localhost 10084
 grep -h "CONSENSUS:" logs/*.out logs/*.log | sort | uniq -c
 ```
 
-5.Admin command:
+5. Admin command:
 - One-click clearance and start:
   - By default, 9 processes will be stopped at the end.
   - "keep" means to keep running, which is convenient for you to operate manually.
@@ -125,10 +125,11 @@ sleep 3
 # expected: OK propose M4
 grep -h "CONSENSUS:" logs/*.out | wc -l # expected: 9
 ```
-- 3b: (M2（latent）propose -> change to cafe (reliable)
+- 3b: (M2（latent）propose -> change to cafe (reliable))
 ```
-printf "propose M2\n" | nc -w 1 localhost 10082 # expected: OK propose M2
+printf "propose M2\n" | nc -w 1 localhost 10082
 sleep 2
+# expected: OK propose M2
 printf "profile set M2 cafe\n" | nc -w 1 localhost 10082 # expected: OK profile M2 reliable or cafe
 sleep 2
 grep -h "CONSENSUS:" logs/*.out | wc -l # expected: 9
