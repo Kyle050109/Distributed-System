@@ -53,7 +53,7 @@ grep -h "CONSENSUS:" logs/*.out logs/*.log | sort | uniq -c
 # 5. Admin command:
 - One-click clearance and start:
   - By default, 9 processes will be stopped at the end.
-  - "keep" means to keep running, which is convenient for you to operate manually.
+  - "keep" means to keep running, which is convenient for you to operate manually, so if you want to run command manually, please use ./start_fresh.sh --keep, but if run auto tests, ./start_fresh.sh is enough.
 ```
 chmod +x start_fresh.sh
 ./start_fresh.sh --keep
