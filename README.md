@@ -92,7 +92,7 @@ grep -h "CONSENSUS:" logs/*.out | wc -l # expected: 9
 grep -h "CONSENSUS:" logs/*.out logs/*.log | sort | uniq -c
 # Will see: a line of "9 CONSENSUS:..." Each node has one structured line
 ```
-# 7. Manual demonstration: (If you see 'Already decided:...' It indicates that a resolution was reached before; First './start_fresh.sh --keep' then start the round again.)
+# 7. Manual demonstration: (If you see 'Already decided:...' It indicates that a resolution was reached before; First './start_fresh.sh --keep' then start the round again. Technically, you need to run ./start_fresh.sh --keep when start another one scenario test.)
 - Scenario 1: The Ideal Network
 ```
 # all members reliable（start_fresh will do this）
