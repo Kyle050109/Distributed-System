@@ -99,7 +99,9 @@ grep -h "CONSENSUS:" logs/*.out logs/*.log | sort | uniq -c
 printf "propose M5\n" | nc -w 1 localhost 10085
 sleep 1
 grep -h "CONSENSUS:" logs/*.out | wc -l
-# expected 9
+# expected:
+OK propose M5
+9
 ```
 - Scenario 2: Concurrent Proposals:
 ```
