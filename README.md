@@ -144,7 +144,7 @@ sleep 2
 #expected: OK propose M2
 printf "profile set M2 cafe\n" | nc -w 1 localhost 10082 
 sleep 2
-#expected: OK profile M2 reliable or cafe
+#expected: OK profile M2 cafe PS: here, cafe = reliable
 grep -h "CONSENSUS:" logs/*.out | wc -l # expected: 9
 ```
 - 3c: After M3 proposed, it crashes -> M1 takes the relay
