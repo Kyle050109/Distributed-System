@@ -35,6 +35,8 @@ M9,localhost,19009
 ```
 mvn package
 mvn compile
+
+Then make sure you already located at root.
 ```
 # 4. Quick Start:
 ```
