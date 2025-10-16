@@ -191,30 +191,63 @@ grep -h "CONSENSUS:" logs/*.out | wc -l # expected: 9
   ```
 
 - Scenario 4: Persistency
+- Decided persistence:
 ```
-# propose first,(make acceptors have promised/accepted)
-printf "propose M5\n" | nc -w 1 localhost 10084
-sleep 2
+# 0) 清场并保持运行
+./start_fresh.sh --keep
 
-# kill M5
-kill "$(cat logs/M5.pid)" 2>/dev/null || pkill -f "--id M5"
-sleep 1
+# 1) 为了降低“瞬间决定”的概率，全员 reliable 但我们靠时间卡点
+for i in 1 2 3 4 5 6 7 8 9; do p=$((10080+i)); printf "profile set M%d reliable\n" $i | nc -G 2 -w 2 localhost $p; done
 
-# restart M5 with the same parameters
+# 2) 让 M4 发起提名 M5，立刻在 30~40ms 内杀掉 M5（比你刚才 50ms 更早）
+printf "propose M5\n" | nc -G 2 -w 2 localhost 10084
+sleep 0.03
+kill -9 "$(<logs/M5.pid)" 2>/dev/null || pkill -9 -f 'app\.CouncilMember.*--id[[:space:]]M5' || true
+
+# 3) 立即重启 M5
 java -cp target/classes app.CouncilMember \
   --id M5 --config network.config \
-  --profile standard \
-  --adminPort 10085 --seed 45 > logs/M5.out 2>&1 &
-echo $! > logs/M5.pid
+  --profile reliable \
+  --adminPort 10085 --seed 45 > logs/M5.out 2>&1 & echo $! > logs/M5.pid
+sleep 0.5
 
-# submit another proposal and observe whether M5 will make promises/nack... ,based on history
-printf "propose M1\n" | nc -w 1 localhost 10081
+# 4) 查看恢复行（希望看到 decided=null；可能 acc 也为 null 或已记录 accN）
+grep -n "RECOVER" logs/M5.out
+
+# 5) 继续推进（再由 M4 发一次或 M1 发一次）
+printf "propose M5\n" | nc -G 2 -w 2 localhost 10084
 sleep 2
-grep -E "PROMISE|NACK|ACCEPTED|CONSENSUS" logs/M5.* | tail -n 30
+
+# 6) 验证一致性与日志
+grep -h "^CONSENSUS:" logs/*.out | sort | uniq -c
+sed -n '1,120p' state_M5.txt
+
 #PROMISE: do not accept a new proposal which is less than n.
 #NACK: reject new proposal, because already received a higher one.
 #ACCEPTED: already accepted your values.
 #CONSENSUS: learnt a result after ACCEPTED.
+```
+   - Pre-decision persistence:
+```
+./start_fresh.sh --keep
+# 让 M5 快一点，其它稍慢，降低“瞬间决定”的概率
+printf "profile set M5 reliable\n" | nc -G 2 -w 2 localhost 10085
+for id in M1 M2 M4 M6; do p=$((10080+${id#M})); printf "profile set %s latent\n" "$id" | nc -G 2 -w 2 localhost $p; done
+for id in M3 M7 M8 M9; do p=$((10080+${id#M})); printf "profile set %s standard\n" "$id" | nc -G 2 -w 2 localhost $p; done
+
+# 让 M4 发起，等待 0.05~0.07s（通常足够 M5 写 promised，但尚未多数决定）
+printf "propose M5\n" | nc -G 2 -w 2 localhost 10084
+sleep 0.06
+kill -9 "$(<logs/M5.pid)" 2>/dev/null || pkill -9 -f 'app\.CouncilMember.*--id[[:space:]]M5' || true
+
+# 重启并观察 RECOVER
+java -cp target/classes app.CouncilMember \
+  --id M5 --config network.config \
+  --profile standard \
+  --adminPort 10085 --seed 45 > logs/M5.out 2>&1 & echo $! > logs/M5.pid
+sleep 0.5
+grep -n "RECOVER" logs/M5.out
+# 期望：promised=... 非空，accepted/decided 仍为 null（或 accepted 也可能非空，看时机）
 ```
 
 - Scenario 5: Stable Proposal:
