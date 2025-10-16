@@ -138,16 +138,37 @@ sleep 2
 grep -h "CONSENSUS:" logs/*.out | wc -l # expected: 9
 ```
 - 3c: After M3 proposed, it crashes -> M1 takes the relay
-```
-# crash (kill the processes) after propose # expected: OK propose M3
-printf "propose M3\n" | nc -w 1 localhost 10083
-sleep 1
-kill "$(cat logs/M3.pid)" 2>/dev/null || pkill -f "--id M3"
+  - (1): As before,
+  ```
+  ./start_fresh.sh --keep
+  ```
+  - (2): Slow down the "majority node" to prevent M3 from quickly obtaining the majority:
+  ```
+  # M3 uses "failure" (or "reliable" is fine; the key is that others are slow)
+  printf "profile set M3 failure\n" | nc -G 1 -w 1 localhost 10083
 
-# other members take the relay
-printf "propose M1\n" | nc -w 1 localhost 10081 #expected: OK propose M1
-sleep 2
-grep -h "CONSENSUS:" logs/*.out | wc -l
-# expected: 8  because the M3 process has been killed, it will not print
-```
+  # Slow down the majority (≥5) : M1 M2 M4 M5 M6 -> latent
+  for id in M1 M2 M4 M5 M6; do
+    p=$((10080 + ${id#M}))
+    printf "profile set %s latent\n" "$id" | nc -G 1 -w 1 localhost "$p"
+  done
+
+  #The rest remain standard (or ignore it).
+  for id in M7 M8 M9; do
+    p=$((10080 + ${id#M}))
+    printf "profile set %s standard\n" "$id" | nc -G 1 -w 1 localhost "$p"
+  done
+  ```
+  - (3) M3 propose:
+  ```
+  printf "propose M3\n" | nc -G 1 -w 1 localhost 10083
+  sleep 0.10
+  kill -9 "$(<logs/M3.pid)" 2>/dev/null \
+    || pkill -9 -f 'app\.CouncilMember.*--id[[:space:]]M3' \
+    || true
+
+  # make sure it is really gone
+  pgrep -fl 'app\.CouncilMember.*--id[[:space:]]M3' || echo "M3 gone"
+  nc -z -w 1 localhost 10083 || echo "admin 10083 closed"
+  ```
 
