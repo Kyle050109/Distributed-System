@@ -166,7 +166,7 @@ grep -h "CONSENSUS:" logs/*.out | wc -l # expected: 9
   - (3) M3 propose:
   ```
   printf "propose M3\n" | nc -G 2 -w 2 localhost 10083
-  sleep 0.03
+  sleep 0.04
   kill -9 "$(<logs/M3.pid)" 2>/dev/null || pkill -9 -f 'app\.CouncilMember.*--id[[:space:]]M3' || true
 
   # make sure it is really gone
