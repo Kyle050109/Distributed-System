@@ -105,13 +105,19 @@ OK propose M5
 ```
 - Scenario 2: Concurrent Proposals:
 ```
+(1)
 printf "propose M1\n" | nc -w 1 localhost 10081 &
 sleep 0.35
+
+(2)
 printf "propose M8\n" | nc -w 1 localhost 10088 &
 wait
 sleep 2
+# expected: OK (ignored; already decided M1)
+
+(3)
 grep -h "CONSENSUS:" logs/*.out | wc -l
-# expected: only one winner M1, and shows IGNORED...
+# expected: 9
 ```
 - Scenario 3: Fault-Tolerance: (state change（M1=reliable, M2=latent, M3=failure, others are standard)
 - Once run 3a/3b/3c, ./start_fresh.sh --keep first, input below code then run.
