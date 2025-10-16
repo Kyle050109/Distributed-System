@@ -79,6 +79,58 @@ printf "winner?\n" | nc -w 1 localhost 10081
 ```
 
 # 6. Logs and Verification:
+- This implementation prints several types of keywords that correspond one-to-one with the Paxos stage in the log, facilitating the evaluation script and manual inspection：
+```
+Message type:
+
+PREPARE
+Proposer 进入 Phase 1，向所有 Acceptors 发送 “准备号” n。
+日志示例：SEND PREPARE inst=ELECTION-1 n=... to=Mk
+
+PROMISE
+Acceptor 收到 PREPARE(n) 且 n >= promisedN 时返回。包含该 Acceptor 先前已接受的最高 (accN, accV)（若有）。
+作用：Proposer 收集到多数 PROMISE 后，进入 Phase 2；若收到的 accV 非空，必须沿用最高 accN 对应的 accV。
+日志示例（收）：RECV PROMISE from=Mk n=<n> accN=<accN> accV=<accV> (x/5)
+
+ACCEPT
+Proposer 在拿到多数 PROMISE 后，选择值 v（若有 accV 就用 accV，否则用自己的候选值），向所有 Acceptors 发送 ACCEPT(n, v)。
+日志示例：PHASE2 SEND ACCEPT n=<n> v=<v>
+
+ACCEPTED
+Acceptor 对 ACCEPT(n, v) 进行“接受”，条件是 n >= promisedN。它会记录 acceptedN=n, acceptedV=v 并回复 ACCEPTED。
+作用：Proposer 观察到多数 ACCEPTED 后即可决定。
+日志示例（收）：RECV ACCEPTED from=Mk n=<n> (x/5)
+
+NACK
+Acceptor 在 n < promisedN 时拒绝 PREPARE 或 ACCEPT，并携带当前更高的 promisedN（日志里显示 higher=...）。
+作用：Proposer 需要提升 proposal number 后重试（本实现会自动回退重试）。
+日志示例：NACK higher=<promisedN> (on PREPARE/ACCEPT ...) / RECV NACK higher=... -> backoff+retry
+
+DECIDE
+当 Proposer 观察到多数 ACCEPTED 时，会在本地 decide，并向全体广播 DECIDE(v)。Learner 收到后进行本地落盘与幂等处理。
+日志示例：DECIDE BROADCAST v=<v> / DECIDE REBROADCAST (recovered) v=<v>
+
+Human-readable markers:
+CONSENSUS:
+Learner 本地“学习到”最终结果时打印的固定行，形式为：
+CONSENSUS: <Mx> has been elected Council President!
+
+这是场景判题/grep 的主依据。9 个成员都活着时会出现 9 行；若某成员崩溃，可能少于 9 行（例如 8 行）。
+
+同时我们也把这行写入 logs/<Mi>.log 与 target/itest-logs/<Mi>.log，便于脚本收集。
+
+Already decided …; ignoring propose …
+集群已经有最终赢家时，新的 propose 被忽略；管理员命令仍返回 OK (ignored; already decided ...)。该提示能验证决议稳定性（post-decision stability）。
+
+RECOVER promised=… acceptedN=… acceptedV=… decided=…
+进程启动时打印已从磁盘恢复的持久化状态（持久化测试的关键证据）。
+
+未决定前崩溃的理想输出可能是：promised=... acceptedN=null acceptedV=null decided=null（或 accepted 也非空，看时机）。
+
+已决定后重启会看到 decided=<Mx>，并自动补打一条 CONSENSUS: 以及一次 DECIDE 复播。
+
+
+```
 - Two types of logs exist simultaneously
   - logs/M?.out：Standard output (plain text, often 'CONSENSUS:' at the beginning of the line).
   - logs/M? .log: Structured (including the prefix [time][node=M?]).
