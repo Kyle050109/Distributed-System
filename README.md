@@ -183,20 +183,22 @@ grep -h "CONSENSUS:" logs/*.out | wc -l # expected: 9
   ```
   - (4) Switch most of the nodes back to normal and then have M1 take the relay:
   ```
+  (1)
   for id in M1 M2 M4 M5 M6; do
     p=$((10080 + ${id#M}))
     printf "profile set %s standard\n" "$id" | nc -G 1 -w 1 localhost "$p"
   done
 
+  (2)
   printf "propose M1\n" | nc -G 1 -w 1 localhost 10081
   sleep 2
   ```
   - (5) Prove:
   ```
-  # Plain text CONSENSUS (at the beginning of the line), expected 8 (M3 is dead and will not be printed)
+  # Expected: 8 (M3 is dead and will not be printed)
   grep -h "CONSENSUS:" logs/*.out | wc -l
 
-  # The winner (should be M1)
+  # Expected: The winner should be M1
   grep -h "CONSENSUS:" logs/*.out | sort | uniq -c
   ```
 
