@@ -4,7 +4,7 @@
 - Implement 9 councilors (M1...) with Paxos M9) The one-time election of the "Council President"
 - TCP Socket communication is used between processes.
 - Each member simultaneously assumes the roles of Proposer, Acceptor, and Learner.
-- The network behavior profile (reliable, delayed, failed, standard, cafe) of members can be configured/switched at runtime.
+- The network behavior profile (reliable, delayed, failed, standard, cafe(same as reliable)) of members can be configured/switched at runtime.
 - The elected result that reaches a single consensus in various scenarios (ideal network, concurrent proposal, fault tolerance, persistence, resolution stability)
 - Audit logs are produced through scripts and tests as evidence.
 
@@ -171,4 +171,86 @@ grep -h "CONSENSUS:" logs/*.out | wc -l # expected: 9
   pgrep -fl 'app\.CouncilMember.*--id[[:space:]]M3' || echo "M3 gone"
   nc -z -w 1 localhost 10083 || echo "admin 10083 closed"
   ```
+  - (4) Switch most of the nodes back to normal and then have M1 take the relay:
+  ```
+  for id in M1 M2 M4 M5 M6; do
+    p=$((10080 + ${id#M}))
+    printf "profile set %s standard\n" "$id" | nc -G 1 -w 1 localhost "$p"
+  done
+
+  printf "propose M1\n" | nc -G 1 -w 1 localhost 10081
+  sleep 2
+  ```
+  - (5) Prove:
+  ```
+  # Plain text CONSENSUS (at the beginning of the line), expected 8 (M3 is dead and will not be printed)
+  grep -h "CONSENSUS:" logs/*.out | wc -l
+
+  # The winner (should be M1)
+  grep -h "CONSENSUS:" logs/*.out | sort | uniq -c
+  ```
+
+- Scenario 4: Persistency
+```
+# propose first,( make acceptors have promised/accepted)
+printf "propose M5\n" | nc -w 1 localhost 10084
+sleep 2
+
+# kill M5
+kill "$(cat logs/M5.pid)" 2>/dev/null || pkill -f "--id M5"
+sleep 1
+
+# restart M5 with the same parameters
+java -cp target/classes app.CouncilMember \
+  --id M5 --config network.config \
+  --profile standard \
+  --adminPort 10085 --seed 45 > logs/M5.out 2>&1 &
+echo $! > logs/M5.pid
+
+# submit another proposal and observe whether M5 will make promises/nack... ,based on history
+printf "propose M1\n" | nc -w 1 localhost 10081
+sleep 2
+grep -E "PROMISE|NACK|ACCEPTED|CONSENSUS" logs/M5.* | tail -n 30
+#PROMISE: do not accept a new proposal which is less than n.
+#NACK: reject new proposal, because already received a higher one.
+#ACCEPTED: already accepted your values.
+#CONSENSUS: learnt a result after ACCEPTED.
+```
+
+- Scenario 5: Stable Proposal:
+```
+printf "propose M5\n" | nc -w 1 localhost 10084
+sleep 1
+printf "propose M3\n" | nc -w 1 localhost 10081
+sleep 1
+grep -h "CONSENSUS:" logs/*.out | sort | uniq -c
+# still the winner of first time
+```
+
+# 8. Auto Tests:
+```
+# we have two auto tests, for assignemnt requirements, we have one sheel file, use:
+chmod +x run_tests.sh
+./run_tests.sh
+# above tests can collect evidences to artifacts/, including each members' details.
+
+
+# and for internal debugging and tests, we can also use:
+mvn test
+```
+
+# Troubleshooting:
+```
+# Un terminal, check if there are all WINNER: NONE -> check whether the message has really been sent/received (see PREPARE/ACCEPTED)
+for p in 10081 10082 10083 10084 10085 10086 10087 10088 10089; do
+  printf "winner?\n" | nc -w 1 localhost $p
+done
+
+# Then, confirm that the data port is listening (admin port OK does not equal data port OK)
+for p in 9001 9002 9003 9004 9005 9006 9007 9008 9009; do
+  nc -z -w 1 localhost $p && echo "LISTEN $p" || echo "no listen $p"
+done
+# if there is 'no listen', the ports are occupied or the node binding failed, ./start_fresh.sh
+
+
 
