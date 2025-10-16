@@ -154,43 +154,28 @@ grep -h "CONSENSUS:" logs/*.out | wc -l # expected: 9
   ```
   - (2): Slow down the "majority node" to prevent M3 from quickly obtaining the majority:
   ```
-  # M3 uses "failure" (or "reliable" is fine; the key is that others are slow)
-  printf "profile set M3 failure\n" | nc -G 1 -w 1 localhost 10083
-
-  # Slow down the majority (≥5) : M1 M2 M4 M5 M6 -> latent
-  for id in M1 M2 M4 M5 M6; do
-    p=$((10080 + ${id#M}))
-    printf "profile set %s latent\n" "$id" | nc -G 1 -w 1 localhost "$p"
-  done
-
-  #The rest remain standard (or ignore it).
-  for id in M7 M8 M9; do
-    p=$((10080 + ${id#M}))
-    printf "profile set %s standard\n" "$id" | nc -G 1 -w 1 localhost "$p"
+  # set up states for each number
+  printf "profile set M1 reliable\n" | nc -G 2 -w 2 localhost 10081
+  printf "profile set M2 latent\n"   | nc -G 2 -w 2 localhost 10082
+  printf "profile set M3 failure\n"  | nc -G 2 -w 2 localhost 10083
+  for i in 4 5 6 7 8 9; do
+    p=$((10080+i))
+    printf "profile set M%d standard\n" $i | nc -G 2 -w 2 localhost $p
   done
   ```
   - (3) M3 propose:
   ```
-  printf "propose M3\n" | nc -G 1 -w 1 localhost 10083
+  printf "propose M3\n" | nc -G 2 -w 2 localhost 10083
   sleep 0.03
-  kill -9 "$(<logs/M3.pid)" 2>/dev/null \
-    || pkill -9 -f 'app\.CouncilMember.*--id[[:space:]]M3' \
-    || true
+  kill -9 "$(<logs/M3.pid)" 2>/dev/null || pkill -9 -f 'app\.CouncilMember.*--id[[:space:]]M3' || true
 
   # make sure it is really gone
   pgrep -fl 'app\.CouncilMember.*--id[[:space:]]M3' || echo "M3 gone"
   nc -z -w 1 localhost 10083 || echo "admin 10083 closed"
   ```
-  - (4) Switch most of the nodes back to normal and then have M1 take the relay:
+  - (4) Have M1 take the relay:
   ```
-  (1)
-  for id in M1 M2 M4 M5 M6; do
-    p=$((10080 + ${id#M}))
-    printf "profile set %s standard\n" "$id" | nc -G 1 -w 1 localhost "$p"
-  done
-
-  (2)
-  printf "propose M1\n" | nc -G 1 -w 1 localhost 10081
+  printf "propose M1\n" | nc -G 2 -w 2 localhost 10081
   sleep 2
   ```
   - (5) Prove:
@@ -198,8 +183,11 @@ grep -h "CONSENSUS:" logs/*.out | wc -l # expected: 9
   # Expected: 8 (M3 is dead and will not be printed)
   grep -h "CONSENSUS:" logs/*.out | wc -l
 
-  # Expected: The winner should be M1
-  grep -h "CONSENSUS:" logs/*.out | sort | uniq -c
+  # Expected: WINNER: M3
+  for p in 10081 10082 10084 10085 10086 10087 10088 10089; do
+    printf "winner?\n" | nc -G 2 -w 2 localhost $p
+  done
+  # Why winner still is M3? Because if there were already received before the M3 crashed and generated ACCEPTED, according to Paxos security, subsequent proposers must continue to use this value, so the ultimate winner may still be M3
   ```
 
 - Scenario 4: Persistency
