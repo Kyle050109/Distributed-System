@@ -192,7 +192,7 @@ grep -h "CONSENSUS:" logs/*.out | wc -l # expected: 9
 
 - Scenario 4: Persistency
 ```
-# propose first,( make acceptors have promised/accepted)
+# propose first,(make acceptors have promised/accepted)
 printf "propose M5\n" | nc -w 1 localhost 10084
 sleep 2
 
