@@ -181,6 +181,7 @@ grep -h "CONSENSUS:" logs/*.out | wc -l # expected: 9
   - (5) Prove:
   ```
   # Expected: 8 (M3 is dead and will not be printed)
+  # wait around 10 seconds then input:
   grep -h "CONSENSUS:" logs/*.out | wc -l
 
   # Expected: WINNER: M3
