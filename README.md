@@ -184,11 +184,10 @@ grep -h "CONSENSUS:" logs/*.out | wc -l # expected: 9
   # wait around 10 seconds then input:
   grep -h "CONSENSUS:" logs/*.out | wc -l
 
-  # Expected: WINNER: M3
+  # Expected: WINNER: M1, becuase M3 crashed.
   for p in 10081 10082 10084 10085 10086 10087 10088 10089; do
     printf "winner?\n" | nc -G 2 -w 2 localhost $p
   done
-  # Why winner still is M3? Because if there were already received before the M3 crashed and generated ACCEPTED, according to Paxos security, subsequent proposers must continue to use this value, so the ultimate winner may still be M3
   ```
 
 - Scenario 4: Persistency
