@@ -130,7 +130,7 @@ grep -h "CONSENSUS:" logs/*.out | wc -l # expected: 9
 grep -h "CONSENSUS:" logs/*.out logs/*.log | sort | uniq -c
 # Will see: a line of "9 CONSENSUS:..." Each node has one structured line
 ```
-# 7. Manual demonstration: (If you see 'Already decided:...' It indicates that a resolution was reached before; First './start_fresh.sh --keep' then start the round again. Technically, you need to run ./start_fresh.sh --keep when start another one scenario test.)
+# 7. Manual Tests: (If you see 'Already decided:...' It indicates that a resolution was reached before; First './start_fresh.sh --keep' then start the round again. Technically, you need to run ./start_fresh.sh --keep when start another one scenario test.)
 - Scenario 1: The Ideal Network
 ```
 # all members reliable（start_fresh will do this）
@@ -273,8 +273,18 @@ grep -h "CONSENSUS:" logs/*.out | sort | uniq -c
 ```
 # we have two auto tests, for assignemnt requirements, we have one sheel file, use:
 chmod +x run_tests.sh
-./run_tests.sh
-# above tests can collect evidences to artifacts/, including each members' details.
+./run_tests.sh  #run all
+
+or you can run tests separately:
+./run_tests.sh s1
+./run_tests.sh s2
+./run_tests.sh s3a
+./run_tests.sh s3b
+./run_tests.sh s3c
+./run_tests.sh s4  
+./run_tests.sh s5
+
+# above tests can collect evidences to artifacts/, including each members' details about each scenario test.
 
 
 # and for internal debugging and tests, we can also use:
