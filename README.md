@@ -261,6 +261,8 @@ sed -n '1,120p' state_M5.txt
 
 - Scenario 5: Stable Proposal:
 ```
+./start_fresh.sh --keep
+
 printf "propose M5\n" | nc -w 1 localhost 10084
 sleep 1
 printf "propose M3\n" | nc -w 1 localhost 10081
@@ -288,12 +290,12 @@ or you can run tests separately:
 
 
 # and for internal debugging and tests, we can also use:
-mvn test
+mvn test (make sure ./start_fresh.sh first)
 ```
 
 # Troubleshooting:
 ```
-# Un terminal, check if there are all WINNER: NONE -> check whether the message has really been sent/received (see PREPARE/ACCEPTED)
+# In terminal, check if there are all WINNER: NONE -> check whether the message has really been sent/received (see PREPARE/ACCEPTED)
 for p in 10081 10082 10083 10084 10085 10086 10087 10088 10089; do
   printf "winner?\n" | nc -w 1 localhost $p
 done
