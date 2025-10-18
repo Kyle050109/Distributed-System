@@ -33,8 +33,8 @@ M9,localhost,19009
 # 3. Build:
 - Use
 ```
-mvn package
 mvn compile
+mvn package (optional)
 
 Then make sure you already located at root.
 ```
